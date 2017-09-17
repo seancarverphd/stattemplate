@@ -1,0 +1,105 @@
+---
+title: "Bessel’s Correction"
+author: "My Name"
+output: html_document
+---
+
+_**In the context of sampling, Bessel's Correction improves the estimate of standard deviation: specifically, while the sample standard deviation is a biased estimate of the population standard deviation, the bias is smaller with Bessel's Correction.**_
+
+```{r load, message=F, echo=F}
+require(ggplot2)
+require(dplyr)
+require(scales)
+require(reshape2)
+require(lubridate)
+require(ggthemes)
+require(gridExtra)
+require(lubridate)
+data(diamonds)
+```
+
+For data, we will use the _diamonds_ data set in the R-Package ggplot2, which contains data from `r nrow(diamonds)` round cut diamonds. Here are the first 6 rows of this data set:
+```{r head, echo=F}
+head(diamonds)
+```
+## Describing the distribution of the "price" variable
+
+<span style="color:red">Answer this question: what is the meaning of a distribution of a variable, and how does it relate to price?</span> 
+
+#### Type of variable chosen
+
+<span style="color:red">Explain what a quantitative variable, and why it was important to make such a choice in a report about standard deviation.  Explain how the concepts of numerical and quantitative variables are different, though related.</span> 
+
+#### Histogram of diamonds price.
+
+<span style="color:red">What is a histogram?  Explain graph below.</span> 
+
+```{r histdia, echo=F}
+ggplot(diamonds, aes(x = price)) + 
+  geom_histogram(color = "black", fill = "DarkOrange", binwidth = 500) + 
+  scale_x_continuous(labels = dollar, breaks = seq(0, 20000, 1000)) + 
+  theme(axis.text.x = element_text(angle = 90)) + 
+  xlab("Price") + ylab("Count")
+```
+
+#### Violin plot
+
+<span style="color:red">Explain the relationship between a histogram and a violin plot.</span> 
+
+```{r violdia, echo = F}
+ggplot(diamonds, aes(x=0, y=price)) + geom_violin(fill = "DarkOrange") + xlab("") + theme(axis.text.x=element_blank())
+```
+
+#### Numerical Summaries
+
+R has a function that returns numerical summaries of data.  For example:
+
+```{r summary}
+summary(diamonds$price)
+```
+
+<span style="color:red">Describe what each of these numbers means.</span> 
+
+#### Modified Box Plots
+<span style="color:red">Describe the relationship of the numbers above to the modified box plot, here drawn inside the violin plot.  Explain the difference between a boxplot and a modified box plot. </span> 
+
+```{r boxdia, echo = F}
+ggplot(diamonds, aes(x=0, y=price)) + geom_violin() + geom_boxplot(width=0.1, fill = "DarkOrange") + xlab("") + theme(axis.text.x=element_blank())
+```
+
+#### Adding the mean to the plot
+<span style="color:red">Add one sentence to indicate where the mean is on this plot.</span> 
+
+```{r meandia, echo = F}
+ggplot(diamonds, aes(x=0, y=price)) + geom_violin() + geom_boxplot(width=0.1) + xlab("") + theme(axis.text.x=element_blank()) + stat_summary(fun.y=mean, geom="point", size=2, color="red")
+```
+
+#### Standard Deviation: Formulas
+
+<span style="color:red">Explain the formulas below, say which uses Bessel's correction.</span> 
+
+$$s = \sqrt{\frac{1}{n-1}\sum\left(x_i - \bar x\right)^2}$$
+
+$$s_n = \sqrt{\frac{1}{n}\sum\left(x_i - \bar x\right)^2}$$
+
+#### Standard Deviation of Diamonds Price
+We compute the standard deviation (with Bessel's correction) of the price variable:
+
+```{r sd}
+sd(diamonds$price)
+```
+
+How about without Bessel's correction?  Well, R doesn't seem to have this function, but we can add it:
+
+```{r sdn}
+sdn <- function(x) {
+  return(sqrt(mean((x - mean(x))^2)))
+}
+sdn(diamonds$price)
+```
+
+## Sampling
+
+The statement that began this document asserted that Bessel's correction is important in the context of _sampling_. <span style="color:red">Explain sampling here, explain the difference between the sample standard deviation and the population standard deviation, and say which we used above.  Explain the differences between a population, and a sample, a parameter and a statistic.  G</span>
+
+sampling distributions for statistics, sampling error, sampling bias, biased estimators and unbiased estimators.
