@@ -1,19 +1,19 @@
 ---
-title: "Bessel’s Correction"
+title: "Bessel’s Correction & Sampling Distributions"
 author: "My Name"
 output: html_document
 ---
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(cache = TRUE)
+```
+
 _**In the context of sampling, Bessel's Correction improves the estimate of standard deviation: specifically, while the sample standard deviation is a biased estimate of the population standard deviation, the bias is smaller with Bessel's Correction.**_
 
-```{r load, message=F, echo=F}
+```{r load, message=F, echo=F, cache=FALSE}
 require(ggplot2)
-require(dplyr)
 require(scales)
 require(reshape2)
-require(lubridate)
-require(ggthemes)
-require(gridExtra)
 require(lubridate)
 data(diamonds)
 ```
@@ -28,7 +28,7 @@ head(diamonds)
 
 #### Type of variable chosen
 
-<span style="color:red">Explain what a quantitative variable, and why it was important to make such a choice in a report about standard deviation.  Explain how the concepts of numerical and quantitative variables are different, though related.</span> 
+<span style="color:red">Explain what a quantitative variable is, and why it was important to make such a choice in a report about standard deviation.  Explain how the concepts of numerical and quantitative variables are different, though related.</span> 
 
 #### Histogram of diamonds price.
 
@@ -61,7 +61,7 @@ summary(diamonds$price)
 <span style="color:red">Describe what each of these numbers means.</span> 
 
 #### Modified Box Plots
-<span style="color:red">Describe the relationship of the numbers above to the modified box plot, here drawn inside the violin plot.  Explain the difference between a boxplot and a modified box plot. </span> 
+<span style="color:red">Describe the relationship of the numbers above to the modified box plot, here drawn inside the violin plot.  Explain the difference between a boxplot and a modified box plot.  Explain what an outlier is, and how suspected outliers are identified in a modified box plot. </span> 
 
 ```{r boxdia, echo = F}
 ggplot(diamonds, aes(x=0, y=price)) + geom_violin() + geom_boxplot(width=0.1, fill = "DarkOrange") + xlab("") + theme(axis.text.x=element_blank())
@@ -98,8 +98,192 @@ sdn <- function(x) {
 sdn(diamonds$price)
 ```
 
+<span style="color:red"> How close are these estimates?  Which is larger?  </span>
+
+So what is the big deal about Bessel's correction?  See below.
+
 ## Sampling
 
-The statement that began this document asserted that Bessel's correction is important in the context of _sampling_. <span style="color:red">Explain sampling here, explain the difference between the sample standard deviation and the population standard deviation, and say which we used above.  Explain the differences between a population, and a sample, a parameter and a statistic.  G</span>
+The statement that began this document asserted that Bessel's correction is important in the context of _sampling_. <span style="color:red">Explain sampling here: explain the differences between a population, and a sample, and between a parameter and a statistic.  Give examples of parameters and give examples of statistics.  Explain the difference between the sample mean and the population mean.  Explain the difference between the sample standard deviation and the population standard deviation.</span>
 
-sampling distributions for statistics, sampling error, sampling bias, biased estimators and unbiased estimators.
+We can sample from the diamonds data set and display the price of the diamonds in the sample.
+
+#### Sample size, $n$.
+
+First, we need to choose a sample size, $n$.  We choose $n=4$ which is very low in practice, but will serve to make a point.
+
+```{r choosen}
+sample.size <- 4
+```
+
+#### Set the seed of the pseudorandom number generator.
+Sampling is random, so next we set the seed. <span style="color:red">Explain what a seed of a random number generator is.  Explain what happens when you use the same seed and what happens when you use different seeds.  The simulations below may help you. </span>
+
+```{r seed}
+set.seed(1)
+```
+
+#### Sample once and repeat.
+
+Now let's try sampling, once.
+
+```{r diasample}
+sample(diamonds$price, sample.size)
+```
+
+<span style="color:red"> Explain what this command did. </span>
+
+Let's try it with another seed:
+```{r diasample2}
+set.seed(2)
+sample(diamonds$price, sample.size)
+```
+
+And another:
+```{r diasample3}
+set.seed(3)
+sample(diamonds$price, sample.size)
+```
+
+And back to the first one:
+```{r diasample1}
+set.seed(1)
+sample(diamonds$price, sample.size)
+```
+
+<span style="color:red">Explain these results.</span>
+
+Finally, what happens when we don't set a seed, between samples.
+```{r noseed}
+set.seed(1)
+sample(diamonds$price, sample.size)
+sample(diamonds$price, sample.size)
+sample(diamonds$price, sample.size)
+set.seed(1)
+sample(diamonds$price, sample.size)
+sample(diamonds$price, sample.size)
+sample(diamonds$price, sample.size)
+```
+
+<span style="color:red">Explain these results.</span>
+
+#### Describing samples with one number: a statistic
+
+```{r diasamplemean}
+set.seed(1)
+mean(sample(diamonds$price,sample.size))
+mean(sample(diamonds$price,sample.size))
+mean(sample(diamonds$price,sample.size))
+```
+
+<span style="color:red"> Explain what we have done here.  Answer the following question: what other statistics could we use to describe samples? </span>
+
+For example standard deviation, with Bessel's correction:
+
+```{r diasamplesd}
+set.seed(1)
+sd(sample(diamonds$price,sample.size))
+sd(sample(diamonds$price,sample.size))
+sd(sample(diamonds$price,sample.size))
+```
+
+And standard deviation, without Bessel's correction:
+
+```{r diasamplesdn}
+set.seed(1)
+sdn(sample(diamonds$price,sample.size))
+sdn(sample(diamonds$price,sample.size))
+sdn(sample(diamonds$price,sample.size))
+```
+
+#### Sampling Distributions of Statistics
+
+<span style="color:red"> Explain what a sampling distribution of a statistic is and how it relates to the numbers computed above. Answer the following question: what tools do we have to describe these distributions? </span>
+
+#### Sampling distribution for the mean of price of a sample of diamonds.
+
+The plot below shows images of the sampling distribution for the sample mean, for different values of sample size.
+
+<span style="color:red"> Answer the following questions: what do the features of the graph below represent? One hint: the horizontal line is the population mean of the prices of all diamonds in the data set.  <span>
+
+```{r samplesizeplot, echo=F}
+diamonds.price.sample.of.n <- function(sample.size) {
+  return(sample(diamonds$price, sample.size))
+}
+
+m.statistics.of.n <- function(statistic,number.of.samples,sample.size) {
+  stats <- c()
+  for (k in 1:number.of.samples) {
+    stats <- c(stats, statistic(diamonds.price.sample.of.n(sample.size)))
+  }
+  return(stats)
+}
+
+set.seed(2)
+m <- 1000
+stats <- cbind()
+labels <- cbind()
+levels <- c(1,4,16,64,256,1024)
+for (i in c(1,4,16,64,256,1024)) {
+  new.stats <- cbind(m.statistics.of.n(statistic=mean, number.of.samples=m, sample.size=i))
+  new.labels <- cbind(rep(as.character(i), m))
+  stats <- rbind(stats, new.stats)
+  labels <- rbind(labels, new.labels)
+}
+df <- data.frame(stats,labels)
+df$labels <- factor(df$labels,levels=as.character(levels))
+ggplot(df, aes(x=labels, y=stats)) + geom_violin() + geom_boxplot(width=0.1) + xlab("Sample Size") + ylab("Sample Mean") + stat_summary(fun.y=mean, geom="point", size=2, color="red") + geom_hline(yintercept=mean(diamonds$price))
+```
+
+<span style="color:red"> Explain the concept of an _estimator_.  What is the sample mean estimating, and it what situation does it do a better job?</span>
+
+Let's try describing the sampling distribution of the sample standard deviation with Bessel's Correction.  Again the samples are of diamonds, and the variable considered is the price of diamonds:
+
+```{r samplesd, echo=F, warning=F}
+set.seed(2)
+m <- 1000
+stats <- cbind()
+labels <- cbind()
+levels <- c(1,4,16,64,256,1024)
+for (i in c(1,4,16,64,256,1024)) {
+  new.stats <- cbind(m.statistics.of.n(statistic=sd, number.of.samples=m, sample.size=i))
+  new.labels <- cbind(rep(as.character(i), m))
+  stats <- rbind(stats, new.stats)
+  labels <- rbind(labels, new.labels)
+}
+df <- data.frame(stats,labels)
+df$labels <- factor(df$labels,levels=as.character(levels))
+ggplot(df, aes(x=labels, y=stats)) + geom_violin() + geom_boxplot(width=0.1) + xlab("Sample Size") + ylab("Sample Standard Deviation") + stat_summary(fun.y=mean, geom="point", size=2, color="red") + geom_hline(yintercept=sd(diamonds$price)) + scale_y_continuous(limits = c(0, 10000))
+```
+
+Some people argue that it is appropriate to drop Bessel's correction for populations, but if the population size is large, as shown here it doesn't matter much.  <span style="color:red"> Why? What is the sample standard deviation estimating?  In what situations is it a better estimate? </span>
+
+Now let's try without Bessel's correction:
+
+```{r samplesdn, echo=F, warning=F}
+set.seed(2)
+m <- 1000
+stats <- cbind()
+labels <- cbind()
+levels <- c(1,4,16,64,256,1024)
+for (i in c(1,4,16,64,256,1024)) {
+  if (i==1) {
+    new.stats <- cbind(rep(NA, m))
+  } else {
+    new.stats <- cbind(m.statistics.of.n(statistic=sdn, number.of.samples=m, sample.size=i))
+  }
+  new.labels <- cbind(rep(as.character(i), m))
+  stats <- rbind(stats, new.stats)
+  labels <- rbind(labels, new.labels)
+}
+df <- data.frame(stats,labels)
+df$labels <- factor(df$labels,levels=as.character(levels))
+ggplot(df, aes(x=labels, y=stats)) + geom_violin() + geom_boxplot(width=0.1) + xlab("Sample Size") + ylab("Sample Standard Deviation w/o Bessel's Correction") + stat_summary(fun.y=mean, geom="point", size=2, color="red") + geom_hline(yintercept=sdn(diamonds$price)) + scale_y_continuous(limits = c(0, 10000))
+```
+
+<span style="color:red"> Answer the following questions: what is the difference between the standard deviation with Bessel's correction and the standard deviation without Bessel's correction?  Which do you think is better and when does it matter? </span>
+
+#### Sampling error and sampling bias
+
+<span style="color:red"> Describe the difference between sampling error and sampling bias.  Describe the difference between a biased estimator and unbiased estimators. </span>
+ 
