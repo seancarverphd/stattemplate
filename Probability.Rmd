@@ -12,6 +12,8 @@ output: html_document
 * A **probability model** is a description of a random phenomenon in the language of mathematics: The description includes (1) the sample space, (2) the outcomes, (3) the events, (4) the probability of all the events.
 * The **sample space** is the set of all outcomes: written $S$.
 * An **event** is a subset of the sample space, that is, a collection of some (or all, or even none) of the outcomes of the random phenomenon. For our purposes, all subsets of the sample space are events, however, in advanced books some subsets can be excluded.
+* Set notation: If $A$ and $B$ are events, then "$A$ is a subset of $B$" is written as $A \subset B$.  For example, all events are subsets of the sample space.  On the other hand, "$A$ is _not_ a subset of $B$" is written as $A \not\subset B$.
+* Set notation: if $x$ is an outcome and $A$ is an event, then "$x$ is an element of $A$" is written as $x \in A$. This statement means that the event $A$ contains the outcome $x$.  On the other hand, "$x$ is _not_ an element of $A$" is written as $x \not\in A$.
 * In any case, the **probablity of an event** is the proportion of times that event will occur in a large number of repetitions of the random phenomenon.
 * The **probability of an outcome** is the porportion of times the outcome will occur in a large number of repetitions of the random phenomenon.
 * The null set (written $\emptyset$) is the set containing no elements (in this case, the event containing no outcomes).  In any probability model, $\emptyset$ and $S$ are events (always---even in advanced books that exclude some subsets from being events).
