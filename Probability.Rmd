@@ -1,0 +1,97 @@
+---
+title: "Probability and Sampling"
+author: "My Name"
+output: html_document
+---
+
+## Probability Models
+
+* A **phenomenon** is something that unfolds in the universe, in nature, in the world, etc.
+* An **outcome** of a phenomenon is one single way in which the process can unfold.  Often there can be more than one possible outcome.
+* We call a phenomenon **random** if (1) individual outcomes are uncertain (i.e. there is no way to know in advance which outcome will occur), but (2) there is a regular distribution of outcomes in a large number of repetitions of the phenomenon (e.g. we know about half the time a coin lands on heads, and about half the time it lands on tails).  Random phenomena are the only things studied with the theory of probability.
+* A **probability model** is a description of a random phenomenon in the language of mathematics: The description includes (1) the sample space, (2) the outcomes, (3) the events, (4) the probability of all the events.
+* The **sample space** is the set of all outcomes: written $S$.
+* An **event** is a subset of the sample space, that is, a collection of (some, all, or none of the) outcomes of the random phenomenon. For our puposes all subsets of the sample space are events, however, in advanced books some subsets are excluded.
+* In any case, the **probablity of an event** is the proportion of times that event will occur in a large number of repetitions of the random phenomenon.
+* The **probability of an outcome** is the porportion of times the outcome will occur in a large number of repetitions of the random phenomenon.
+* The null set (written $\emptyset$) is the set containing no elements (in this case, the event containing no outcomes).  In any probability model, $\emptyset$ and $S$ are events (that is always, even in advanced books that exclude some subsets from being events).
+* Two events are **disjoint** if they have no elements in common.
+* Two events are **independent** if knowing that one occurs does not change the probability that the other occurs.
+* The **union** of two events, $A$, and $B$, is the event that consists of all outcomes that are either in $A$ _or_ in $B$: written $A \cup B$ .
+* The **intersection** of two events, $A$, and $B$, is the event that consists of all outcomes that are in both $A$
+_and_ in $B$: written $A \cap B$.
+* The **complement** of an event, $A$, is the event that consists of all outcomes that are not in $A$: written $A^c$.
+
+## Rules of Probability
+
+A probability must be assigned to each event.  In order for the interpretation of probability given above to make sense (specifically, in order to make sense of the statement that the probablity of an event is the proportion of times that the event occurs in a large number of repetitions of a random phenomenon), these rules must be satisfied.
+
+NOTE: Rules 1-3 are what you will see, in advanced books, labeled as axioms.  These are all you need for the statement just mentioned above to make sense.  Rule 4 is a theorem that can be derived from Rules 1-3.  Rule 5 is essentially the definition of independence given in advanced books.
+
+* **Rule 1** For all events $A$,
+$$0 \leq P(A) \leq 1$$
+* **Rule 2** Concerns the sample space, $S$:
+$$P(S) = 1$$
+* **Rule 3** If two events $A$ and $B$ are disjoint, then
+$$P(A \cup B) = P(A) + P(B)$$
+* **Rule 4** For all events $A$,
+$$P(A^c) = 1 - P(A)$$
+* **Rule 5** If two events $A$ and $B$ are independent, then
+$$P(A \cap B) = P(A) \times P(B)$$
+
+## Finite Sample Spaces 
+
+* If $S$ is finite, the the probabilities of all outcomes add to 1.
+* If all outcomes in a finite sample space have the same probability, then each has probability $1/n$, where $n$ is the number of elements in the sample space.  If an event in such a sample space has $m$ elements in it, then its probablity is $m/n$.
+
+## Random Variables
+
+* A **random variable** is a function mapping the sample space of a random phenomenon to real numbers.  In other words, a random variable assigns a _number_ to each outcome of a random phenomenon.
+
+* Example Problem 1: A four-sided die is thrown.  Each side has a different color and the color of the side facing down is observed.  The colors are: red, green, blue, and white.  What is the sample space of this random phenomenon and give an example of a random variable on this sample space.
+
+* Example Problem 2: A random student is chosen from this class.  What is the sample space?  What is an example of a random variable on this sample space.  Hint: you might want to ask this student a question to determine the random variable.
+
+* Example Problem 3: Three random students are chosen from this class.  What is the sample space.  What is an example of a random variable on this sample space.  Same hint: ask the same question to all three students.
+
+## Relationship between functions (including from pre-calculus) and random variables
+
+* A **function** is a set of ordered pairs no two of which have the same first coordinate.
+
+* For a random variable, each ordered pair looks like:
+$$\mbox{outcome} \mapsto \mbox{number}$$
+* There will be one and only one such ordered pair for each element of the sample space.
+
+* Thus to define a random variable, there needs to be a number given to _every_ outcome.   The following is an example of a random variable on the sample space of Example Problem 1:
+
+$$\begin{eqnarray} \mbox{red} & \mapsto & 10 \\ \mbox{green} & \mapsto & 15 \\ \mbox{blue} & \mapsto & -5 \\ \mbox{white} & \mapsto & -10 \end{eqnarray} $$
+These might be interpreted as the winning of a game of chance played with the four-sided die.  We say red maps to 10, green maps to 15, blue maps to -5, and white maps to -10.
+
+* Two or more outcomes can map to the same number.
+$$\begin{eqnarray} \mbox{red} & \mapsto & 15 \\ \mbox{green} & \mapsto & 15 \\ \mbox{blue} & \mapsto & -5 \\ \mbox{white} & \mapsto & -10 \end{eqnarray} $$
+The repeated 15 is OK.  What is shown above is also a correct answer to Example Problem 1.
+
+* However the same outcome **CANNOT* have two numbers.  The follow is **NOT** and example of a random variable:
+
+$$\begin{eqnarray} \mbox{red} & \mapsto & 10 \\\mbox{red} & \mapsto & 15 \\ \mbox{green} & \mapsto & 15 \\ \mbox{blue} & \mapsto & -5 \\ \mbox{white} & \mapsto & -10 \end{eqnarray}$$
+
+The repeated red is **NOT OK**.
+
+* In precalculus you might have seen functions of the form $y = 2 x + 1$ or $y = x^2$.  These are functions that map real numbers to real numbers.  There are infinitely many real numbers, so you will never be able to list all ordered pairs in the functions.  But we can list a few of them.  Or you can just write the formulas as
+
+$$ x \mapsto 2 x + 1 $$
+
+Here $x$ takes the role of "outcome", and $2 x + 1$ is the number that $x$ maps to.  If the sample space were all real numbers, this function would be a random variable on that sample space.  To find the number that the outcome maps to, just apply the formula.  E.g.: since $2 \times 0 + 1 = 1$, it is true that $0 \mapsto 1$
+
+In the second function, 
+
+$$x \mapsto x^2$$
+
+For example, if we plug in 2 for $x$ we get $2^2=4$, so $2 \mapsto 4$.  We could plug in any number for $x$ to find the number that $x$ maps to.
+
+* In general, if $y = f(x)$ then $x \mapsto y$.
+
+* The stipulation that the same outcome doesn't get two numbers (e.g. red is not repeated) is a equivalent to the vertical line test that you might be familiar with from precalculus.
+
+## Binomial Random Variable
+
