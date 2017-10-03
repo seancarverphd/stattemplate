@@ -1,0 +1,98 @@
+---
+title: "Quiz 2 Prep"
+author: "STAT 202"
+output: html_document
+---
+
+Here are some of the questions I might ask.
+
+## Sampling Distributions
+
+Look at the following graphs.
+
+```{r load, message=F, echo=F, cache=FALSE}
+require(ggplot2)
+require(scales)
+require(reshape2)
+require(lubridate)
+data(diamonds)
+```
+
+```{r sdn, echo=F}
+sdn <- function(x) {
+  return(sqrt(mean((x - mean(x))^2)))
+}
+```
+
+```{r samplesizeplot, echo=F}
+diamonds.price.sample.of.n <- function(sample.size) {
+  return(sample(diamonds$price, sample.size))
+}
+
+m.statistics.of.n <- function(statistic,number.of.samples,sample.size) {
+  stats <- c()
+  for (k in 1:number.of.samples) {
+    stats <- c(stats, statistic(diamonds.price.sample.of.n(sample.size)))
+  }
+  return(stats)
+}
+
+set.seed(2)
+m <- 1000
+stats <- cbind()
+labels <- cbind()
+levels <- c(1,4,16,64,256,1024)
+for (i in c(1,4,16,64,256,1024)) {
+  new.stats <- cbind(m.statistics.of.n(statistic=mean, number.of.samples=m, sample.size=i))
+  new.labels <- cbind(rep(as.character(i), m))
+  stats <- rbind(stats, new.stats)
+  labels <- rbind(labels, new.labels)
+}
+df <- data.frame(stats,labels)
+df$labels <- factor(df$labels,levels=as.character(levels))
+ggplot(df, aes(x=labels, y=stats)) + geom_violin() + geom_boxplot(width=0.1) + xlab("Sample Size") + ylab("Sample Mean") + stat_summary(fun.y=mean, geom="point", size=2, color="red") + geom_hline(yintercept=mean(diamonds$price))
+```
+
+```{r samplesd, echo=F, warning=F}
+set.seed(2)
+m <- 1000
+stats <- cbind()
+labels <- cbind()
+levels <- c(1,4,16,64,256,1024)
+for (i in c(1,4,16,64,256,1024)) {
+  new.stats <- cbind(m.statistics.of.n(statistic=sd, number.of.samples=m, sample.size=i))
+  new.labels <- cbind(rep(as.character(i), m))
+  stats <- rbind(stats, new.stats)
+  labels <- rbind(labels, new.labels)
+}
+df <- data.frame(stats,labels)
+df$labels <- factor(df$labels,levels=as.character(levels))
+ggplot(df, aes(x=labels, y=stats)) + geom_violin() + geom_boxplot(width=0.1) + xlab("Sample Size") + ylab("Sample Standard Deviation") + stat_summary(fun.y=mean, geom="point", size=2, color="red") + geom_hline(yintercept=sd(diamonds$price)) + scale_y_continuous(limits = c(0, 10000))
+```
+
+```{r samplesdn, echo=F, warning=F}
+set.seed(2)
+m <- 1000
+stats <- cbind()
+labels <- cbind()
+levels <- c(1,4,16,64,256,1024)
+for (i in c(1,4,16,64,256,1024)) {
+  if (i==1) {
+    new.stats <- cbind(rep(NA, m))
+  } else {
+    new.stats <- cbind(m.statistics.of.n(statistic=sdn, number.of.samples=m, sample.size=i))
+  }
+  new.labels <- cbind(rep(as.character(i), m))
+  stats <- rbind(stats, new.stats)
+  labels <- rbind(labels, new.labels)
+}
+df <- data.frame(stats,labels)
+df$labels <- factor(df$labels,levels=as.character(levels))
+ggplot(df, aes(x=labels, y=stats)) + geom_violin() + geom_boxplot(width=0.1) + xlab("Sample Size") + ylab("Sample Standard Deviation w/o Bessel's Correction") + stat_summary(fun.y=mean, geom="point", size=2, color="red") + geom_hline(yintercept=sdn(diamonds$price)) + scale_y_continuous(limits = c(0, 10000))
+```
+
+1. I will likely ask questions that have to do with interpreting these graphs.  For example, what is happening in the progression of sample size starting at 1 or 4 to 1024?  What difference in the properties of the estimator does the differences in the violin/box plot show?  What does this graph imply in terms of the quality of the estimates, and what are you trying to estimate?  Which graphs and which violin/boxes show approximately unbiased estimates?  Which show biased estimates?  What is the difference between sampling error and sampling bias?
+
+2. What is a distribution of a variable and what the sampling distribution of a statistic?
+
+3. Given an example of a random phenomenon: a game of chance, 1 person chosen at random from our class, 3 people chosen at random from our class, what is the sample space and what is an example of a random variable on that sample space?
