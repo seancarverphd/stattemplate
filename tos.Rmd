@@ -1,0 +1,119 @@
+---
+title: "Tests of Significance, Version 1"
+author: "STAT 202"
+output: html_document
+---
+
+Let's work with the diamonds data set again.  Remember the violin/box plot of the price of diamonds in this data set?
+
+
+```{r load, message=F, echo=F, cache=FALSE}
+require(ggplot2)
+require(scales)
+require(reshape2)
+require(lubridate)
+data(diamonds)
+```
+
+```{r meandia, echo = F}
+ggplot(diamonds, aes(x=0, y=price)) + geom_violin() + geom_boxplot(width=0.1) + xlab("") + theme(axis.text.x=element_blank()) + stat_summary(fun.y=mean, geom="point", size=2, color="red") + scale_y_continuous(labels = dollar, breaks = seq(0, 20000, 1000))
+```
+
+The violin/box plot, shown above, illustrates the distribution of the price variable for what we will call the _reference or null population_ of diamonds.  But we are going to work with a sample of diamonds from a _possibly different population_ (for example, diamonds from another store).  For the moment, we will leave the size of this sample unspecified.  Maybe it's only 4 diamonds, or maybe it's 400 diamonds (but actually, below, we will start with a sample of only 1 single diamond, before upping our sample size in a future lesson).  
+
+**Our main question: "Are the diamonds from this new population, the sampled-from population, _more expensive, on average,_ than diamonds from our original (reference, or null) population?"**  In other words, for example, does Zales Jewelers, sell more expensive diamonds, on average, than Helzberg Diamonds?  We would need data from these two stores to address this question.  
+
+I am not going to tell you how I got the samples I use below---that information is totally irrelvant for the present purposes.  Suffice to say, I only have data from one store.  But I will say that it is possible to sample from other populations, given just the data we have.  Specifically, you can create new populations by simply restricting the reference population using other characteristics of diamonds described by the data set: color, cut, clarity, carat, etc.  
+
+For example, we could ask, are diamonds with the D-color designation more expensive than diamonds overall.  If you know anything about diamonds, you might know that diamonds with this color designation are considered more valuable, all other things being equal, than diamonds of any other color designation.  So this question sounds like a no-brainer---except for the "all other things being equal" clause.  Without knowing anything about diamonds, it would be entirely conceivable to wonder if D-color diamonds might tend to be a lot smaller than other diamonds, so their price might tend to be less, on average, despite their superior color, simply due to their inferior weight (carat).  Of course, with the whole data set you could answer this question definitively---and without sampling.  And if you know anything about diamonds, you might know the answer already.
+
+But the question I am asking here is different.  Here, you are given a _sample_ of diamonds, and their prices.  The sample comes from a larger population, and you know that it is drawn as a simple random sample from that population.  You don't know anything about this population other than the prices of the diamonds in that simple random sample.  The sampled-from population may be from another store, or it may be from a subset of diamonds from the reference population.  You don't know---and if you do know, these details don't matter for the problem at hand.  We address this question: are the diamonds in the sampled-from population (the whole population, the one that you don't know about) more expensive, on average, than the diamonds in your reference population (the one that you do know about).
+
+Note that while these questions may be criticized as being contrived, they remain very similar to important questions in other domains, such as: "Does a new drug work better, on average than an old drug," or: "Do students perform better with a new teaching method than with an old teaching method?"  For these questions, sampling is not always so contrived.  You can't know how all the people in the world with the disease you are studying (your population of interest) would respond to your drug---you can only know how the people you are studying in your sample would respond to the drug, the ones to whom you gave the drug.  For these problems, a **two sample** test might be more relevant.  A two sample test would involve, for example, both a sample of people using the new drug, and a sample of people using an old drug (or a placebo).  We will get to two sample tests soon enough, but we will start with a **one sample** test.  Here we compare one sample from an unknown distribution to a reference or null population that is fully known.
+
+Our reference population consists of the entire data set of `r length(diamonds$price)` diamonds.  The population mean of the price of these diamonds (labeled in the plot with the red dot) is $`r format(mean(diamonds$price),nsmall=2)`.  We look for evidence that the sampled-from population consists of diamonds that are more expensive, on average, than the reference population.  In other words, we look for evidence that the population mean **that we would have to derive from the entire sampled-from population** is larger than $`r format(mean(diamonds$price),nsmall=2)`.  The approach we take uses the data we have.
+
+We can identify the following hypotheses:
+
+The _null hypothesis_: the statement that there is no effect:
+
+$$H_0 : \mbox{The sample was drawn from the reference population}$$
+The _alternative hypothesis_: the statement that the effect we want is present:
+
+$$H_a: \mbox{The sample was drawn from a population with a population mean greater than \$`r format(mean(diamonds$price),nsmall=2)`}$$
+
+Here is an example sample of prices of 4 diamonds:
+
+```{r diasample, echo=F}
+sample.size <- 4
+set.seed(1)
+S4.1 <- sample(diamonds$price, sample.size)
+S4.1
+```
+
+Is there evidence for our alternative hypothesis?  We are going to use the sample mean to make this decision.  The sample mean is the sum of these four prices, the only prices we know from the distribution in question, divided by 4.  This sample mean is our **test statistic**.  We don't know the population mean of the population from which the sample was drawn, but we do know that the greater this population mean, the greater we can expect the value of our sample mean to be, and the less likely our sample will be confused with a sample from the null distribution.  For this reason, we interpret large sample means as evidence for our alternative hypothesis.  At some point, when the sample mean is large enough, we deem the evidence for the alternative hypothesis **significant**.  But how large does the sample mean need to be to get this conclusion?  The threshold, where we say the sample mean is large enough, is called the **critical value of the test statistic**.
+
+Let's tackle a simpler problem: our sample will consist of a single diamond: just the first one selected above, with price: $`r S4.1[1]`.  Based on just this diamond, should we accept our alternative hypothesis?  It can be said that we do have some evidence: $`r S4.1[1]` > `r format(mean(diamonds$price),nsmall=2)`.$  But do we have enough evidence?  And how much evidence is enough?  It depends on our critical value.  If `r S4.1[1]` is bigger than our critical value, then we will say we have enough evidence to conclude that diamond was sampled from a population with a greater mean.  If not, we won't be able to say that.  But how do we select this critical value?
+
+We don't know the distribution of the diamonds from the population from which the sample was drawn, however we **do** know the distribution of diamonds under the null hypothesis.   Therefore, we can answer the following question: **If we make the null hypothesis correct by drawing samples from the reference population, and we use our observed test statistic, $`r S4.1[1]`, as the _critical value_, for deciding if, for these new samples, the alternative hypothesis is correct (we already know it isn't) what is the probability that we will make an error?**  This probability is the **_p-value_** for our original sample.  Said a slightly different way, using samples from the reference population, what is the probability of erroneously concluding that these samples come from a more expensive population, assuming the original sample determines our threshold for making this decision.   This probability is the **_p-value_** for our original sample.
+
+Erroneously accepting the alternative hypothesis is called a false positive, because we erroneously find the _positive_ effect: the sample comes from a more expensive population, but the correct answer is negative: we drew our samples from the null distribution.  The following are examples of positive effects: the new store sells more expensive diamonds than the old store, the new drug works better than placebo, my new teaching methods work better than the old ones, etc.  If we come to these conclusions in error, we have made a false-positive error (type I error).  The other type of error is a false negative error (type II error).  Negating the positive statements yields negative statements (e.g. the new drug works the same as placebo), and if such a conclusion is in error (we conclude that the new drug works the same as placebo, when in fact it works better), our conclusion is a false negative (type II) error.  Tests of significance are designed to control for type I errors (false positives), though we can study false negatives as well (mostly saved for future lessons, but see below).
+
+We can never know if the null or the alternative hypothesis is correct with our original sample, but we generally know the distribution of the test statistic under the null hypothesis, so we can generally compute a _p-value_ from our sample.  
+
+**The _p-value_ is the probability, assuming we make the null hypothesis correct, of making a false-positive error---incorrectly accepting the alternative hypothesis---if we use the test statistic seen in our original sample as the critical value for accepting the alternative hypothesis.**
+
+Knowing the distribution of the test statistic, assuming the null hypothesis, allows us to take lots and lots of samples with the null distribution, and see which ones lead to an erroneous acceptance of the alternative hypothesis.  For these new samples, for the ones that lead to such false positives, the test statistic is said to be **more extreme** than the test statistic of the original sample (that is, further into the region where we deem the alternative hypothesis correct).
+
+**The _p-value_ is a probability** and as such it is a number between 0 and 1.  The closer the _p-value_ is to 0, the more surprised we would be to see our data if the null hypothesis were correct.  Low _p-values_ are interpreted as strong evidence for the alternative hypothesis.
+
+Let's draw this: 
+
+```{r meandiawithsample, echo = F}
+ggplot(diamonds, aes(x=0, y=price)) + geom_violin() + geom_boxplot(width=0.1) + xlab("") + theme(axis.text.x=element_blank()) + stat_summary(fun.y=mean, geom="point", size=2, color="red") + scale_y_continuous(labels = dollar, breaks = seq(0, 20000, 1000)) + geom_hline(yintercept=S4.1[1])
+```
+
+The horizontal line is drawn at the price of the single sample diamond: $`r S4.1[1]`.  What if we used this line as the critical value for assessing the truth of the alternative hypothesis?  We have no way of knowing what would happen if the alternative hypothesis were correct.  There are infinitely many distributions that satisfy the alternative hypothesis.  _But we do know what would happen if we make the null hypothesis were correct._  If we make null hypothesis correct, each sample from the reference population would be one diamond, selected from the original distribution.  Moreover each diamond would have an equal chance of being selected (based on the our assumption of simple random sample).  
+
+If the newly sampled diamond's price fell above the black line---newly sampled from the reference population whose distribution is described by the violin/box plot---we would incorrectly reject the null hypothesis.  Remember: although we don't know if the null hypothesis is correct for our original sample, for the hypothetical situation involved with computing the _p-value_, with samples from the reference population, the null hypothesis _is_ correct, by assumption.  Even though null hypothesis is correct with our new samples, we can sometimes make an error and reject the null hypothesis.  We do this when the sampled diamond has a price that falls above the black line at $`r S4.1[1]`.
+
+The number of diamonds in the reference population whose price fall above this line is `r sum(diamonds$price>S4.1[1])` which is `r format(100*sum(diamonds$price>S4.1[1])/length(diamonds$price),digits=4)`% of the diamonds in the data set.  Since each diamond has an equal chance of being selected as our new samples, the probability of an error, in this situation, is:
+
+$$\mbox{p-value} = \frac{`r sum(diamonds$price>S4.1[1])`}{`r length(diamonds$price)`} = `r format(sum(diamonds$price>S4.1[1])/length(diamonds$price),digits=4)`$$
+
+So what's the answer: do we have evidence to support the alternative hypothesis?  Actually, it depends on you.  If you are O.K. with being wrong `r format(100*sum(diamonds$price>S4.1[1])/length(diamonds$price),digits=4)`% of the time when you make the null hypothesis correct, then yes, you do have enough evidence.
+
+Usually an acceptable value for this probability is established before the data are analyzed, often even before the data are collected.
+
+**The _level of significance of a test_, _alpha-level of a test_ or _$\alpha$-level of a test_, is probability of making a false-positive error, assuming the null hypothesis is correct.  The alpha-level of a test is typically decided on, in advance of an experiment, and sets the actual critical value for accepting the alternative hypothesis that is used, regardless of the sample.**
+
+The alpha-level of the test, the acceptable probability of a false-positive error, is usually much lower than `r format(sum(diamonds$price>S4.1[1])/length(diamonds$price),digits=4)`.  In fact, the traditional level, accepted by most statisticians, is 0.05, though other levels are sometimes used.  In other words, many statisticians consider it acceptable to have a 0.05 probability of making a false-positive error, under the condition where the null hypothesis is correct.
+
+So if we set the alpha-level to its traditional level, 0.05, what is the critical value for the test statistic. That's easy: its the value such that 5% of the diamonds have a larger price, and thus 95% of the diamonds have a lower price.  That value has a name: the 95th percentile of the price of diamonds.
+
+```{r percentile95, echo=F}
+critical.value <- quantile(diamonds$price, probs=0.95)
+names(critical.value) <- NULL
+```
+
+The 95th percentile of diamond price in our data set is `r format(critical.value)`.  In other words, if a single diamond, sampled at random from a different data set, such as from a different store, has a price that is greater than `r format(critical.value)`, then statisticians would, based on tradition, consider the evidence sufficient to conclude that the diamonds from the new store are more expensive than the diamonds from the old store.  However, if we trick the statisticians, and give them a diamond from the old store, so that a positive conclusion (diamonds are more expensive from the population sampled) would be wrong, the statisticians would be wrong 5% of the time.  They would know that fact, but consider this rate of false-positive error acceptable.
+
+```{r meandiawithsampleandcriticalvalue, echo = F}
+ggplot(diamonds, aes(x=0, y=price)) + geom_violin() + geom_boxplot(width=0.1) + xlab("") + theme(axis.text.x=element_blank()) + stat_summary(fun.y=mean, geom="point", size=2, color="red") + scale_y_continuous(labels = dollar, breaks = seq(0, 20000, 1000)) + geom_hline(yintercept=S4.1[1])+geom_hline(yintercept=critical.value, color='red')
+```
+
+The black line (at $`r S4.1[1]`) indicates the price of the diamond sampled.  The _p-value_ is the fraction of diamonds in the reference (null) distribution that fall above the black line.  But location of the black line depends on which diamond is chosen for the sample, and this diamond is chosen from a completely unknown distribution.  In fact, we have no idea where this line is likely to fall.  But we interpret its location based on the null distribution.  If the null distribution were correct, how surprised would we be to find the black line where we find it: our surprise is quantified by the p-value.
+
+The red line (at $`r format(critical.value)`) indicates the critical value of the test statistic, determined by the alpha-level of the test (chosen in accordance with tradition to be 0.05), so that 5% of the diamonds in the null distribution lie above the line.  Since the black line is below the red line, (the p-value is greater than 0.05), we do not deem the evidence sufficient to conclude our alternative hypothesis that the diamonds are more expensive, on average, at the new store.  This is said to be a non-significant result, and that the data are not significant.
+
+On the other hand if the black line were higher than the red line, the p-value would be less than 0.05, and we would accept the alternative hypothesis.  In this case we would find a significant result, and the data would be significant.
+
+If the null hypothesis is correct, then we erroneously find a significant effect 5% of the time.  If the alternative hypothesis is correct (the mean of the sampled-from distribution is larger than the mean of the null distribution) then we would usually expect to find a significant effect _more than 5% of the time_.  If we knew the distribution of the sampled-from distribution, we could compute this number exactly: it is called the **power** of the test.  
+
+**The power of a test is the probability that a sample will be significant, assuming the alternative hypothesis is correct.  To compute the power, you must assume you know the distribution of the sampled-from distribution that satisfies the alternative hypothesis.**
+
+Actually, to be precise, the alternative hypothesis is framed in terms of the _mean_ of the sample-from distribution, whereas the power of the test depends on the percentile of the critical value of the test statistic under the sampled-from distribution, which may or may not be bigger than 5%, but usually is substantially bigger than 5%.  A power of 80% is considered good, although many times statisticians settle for much lower power.
+
+The probability of a type I error is always the alpha-level of the test, often 0.05.  The probability of a type II error is $1 - \mbox{power}$.  If the power is 80%, (or 0.8) the probability of a type II error is 0.2.  The power depends on many things, notably the sample-from distribution.  But the best way to control power is to tweak your sample size.
+
+Next up: we will start thinking about what happens to power as we increase the sample size, and why.  I saw this written on the wall of a booth in the library a few years ago: "I heard you upped your sample size.  More power to you!"  We want to understand this statement, and why its true.
