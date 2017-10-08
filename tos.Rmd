@@ -1,5 +1,5 @@
 ---
-title: "Tests of Significance, Version 1"
+title: "Tests of Significance, Version 2"
 author: "STAT 202"
 output: html_document
 ---
@@ -23,6 +23,8 @@ The violin/box plot, shown above, illustrates the distribution of the price vari
 
 **Our main question: "Are the diamonds from this new population, the sampled-from population, _more expensive, on average,_ than diamonds from our original (reference, or null) population?"**  In other words, for example, does Zales Jewelers, sell more expensive diamonds, on average, than Helzberg Diamonds?  We would need data from these two stores to address this question.  
 
+<span style="color:red"> If we had data sets that involved prices of _all_ of the diamonds from Zales Jewlers, and prices of _all_ of the diamonds from Helzberg Diamonds, describe a procedure, with formulas, for determining precisely, beyond a shadow of a doubt, which Jewler sells more expensive diamonds, on average. </span> <span style="color:blue"> Tests of significance apply when you do not have access to all the cases in the population in question. If you only have samples from both populations, you must use a **two-sample** test.  However, if you have all the data from one population, but only a sample from the other, you can use a **one-sample** test, as we have done below. </span>
+
 I am not going to tell you how I got the samples I use below---that information is totally irrelvant for the present purposes.  Suffice to say, I only have data from one store.  But I will say that it is possible to sample from other populations, given just the data we have.  Specifically, you can create new populations by simply restricting the reference population using other characteristics of diamonds described by the data set: color, cut, clarity, carat, etc.  
 
 For example, we could ask, are diamonds with the D-color designation more expensive than diamonds overall.  If you know anything about diamonds, you might know that diamonds with this color designation are considered more valuable, all other things being equal, than diamonds of any other color designation.  So this question sounds like a no-brainer---except for the "all other things being equal" clause.  Without knowing anything about diamonds, it would be entirely conceivable to wonder if D-color diamonds might tend to be a lot smaller than other diamonds, so their price might tend to be less, on average, despite their superior color, simply due to their inferior weight (carat).  Of course, with the whole data set you could answer this question definitively---and without sampling.  And if you know anything about diamonds, you might know the answer already.
@@ -39,6 +41,8 @@ The _null hypothesis_: the statement that there is no effect:
 
 $$H_0 : \mbox{The sample was drawn from the reference population}$$
 The _alternative hypothesis_: the statement that the effect we want is present:
+
+The null hypothesis is one single distribution or population to be used as a benchmark to assess the evidence that it (the null hypothesis) is false.
 
 $$H_a: \mbox{The sample was drawn from a population with a population mean greater than \$`r format(mean(diamonds$price),nsmall=2)`}$$
 
