@@ -1,0 +1,49 @@
+---
+title: "EGsection7"
+author: "Sean Carver"
+date: "11/3/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(cache = TRUE)
+```
+
+## Section 7 GGplot2
+
+Loading ggplot2 with command library:
+
+```{r load}
+library(ggplot2)
+data(singer, package="lattice")
+```
+
+Make our base layer with ggplot(), arguments data, aesthetics.
+
+Make first layer.
+```{r singerbaselayer}
+gg <- ggplot(singer, aes(x=voice.part, y=height))
+gg
+```
+
+```{r plotbox}
+gg + geom_violin(fill="blue", alpha=0.5) + geom_boxplot(fill="red", alpha=0.5)
+```
+
+```{r states}
+data(USArrests)
+crimes <- data.frame(state=tolower(rownames(USArrests)), USArrests)
+```
+
+```{r statesbaselayer}
+library(maps)
+gg <- ggplot(crimes, aes(map_id=state, fill=Murder))
+gg <- gg + geom_map(map=map_data("state"))
+gg <- gg + expand_limits(x=map_data("state")$long, y=map_data("state")$lat)
+gg
+```
+
+```{r addlabels}
+gg + labs(title="Murder rates per 100,000 in 1973", x="longitude", y="latitude")
+```
+

@@ -1,0 +1,136 @@
+---
+title: "GGPlot2 Examples"
+author: "Sean Carver"
+date: "11/1/2017"
+output: html_document
+---
+
+The first step is to load data. Make sure you have installed the packages "ggplot2" and "car".
+```{r loaddata}
+library(ggplot2)
+data(Salaries, package="car")
+```
+
+After loading data, the next step is to create the base layer with the function ggplot().  You typically pass two arguments to ggplot: the data and the asethetics (i.e. what features in the data generate what features in the plot).
+
+The data is: Salaries.  The asethetics for this first plot are: x goes with rank, and y goes with salary.  We are going to do a boxplot with academic rank on the x-axis and salaries on the y-axis.
+
+We are going to call the layers gg as we build them.  Each time we are going to plot the layer by calling its name.
+
+```{r plotsalaryvsrank}
+gg <- ggplot(Salaries, aes(x=rank, y=salary))
+gg
+```
+
+Now we are going to add a geometic object, but we are just going to plot it: we are not going to save it until later.
+```{r addboxplot}
+gg + geom_boxplot()
+```
+
+Let's try another color.
+```{r colorboxplot}
+gg + geom_boxplot(fill="cornflowerblue")
+```
+
+Let's add the notches.  If notches don't overlap, we have evidence that the medians are truly different across the population, even if our data just come from a random sample.
+
+```{r addnotch}
+gg + geom_boxplot(fill="cornflowerblue", notch=TRUE)
+```
+
+I'm happy with this plot.  Let's save it so we can add a third layer.  This won't create a graph, unless you add the command "gg"
+
+```{r saveboxplot}
+gg <- gg + geom_boxplot(fill="cornflowerblue", notch=TRUE)
+```
+
+Now we add a scatterplot (without saving):
+
+```{r addscatter}
+gg + geom_point()
+```
+
+Will be easier to see if we jitter the dots, so that they are not all in a single line.
+
+```{r addjitter}
+gg + geom_point(position="jitter")
+```
+
+Black dots are too harsh.  Let's make them blue.
+
+```{r makedotsblue}
+gg + geom_point(position="jitter", color="blue")
+```
+
+Now let's make them slightly transparent.  That is done with "alpha" 0 for completely transparent 1 for complete opaque.  Let's go with 0.5
+
+```{r makedotstransparent}
+gg + geom_point(position="jitter", color="blue", alpha=0.5)
+```
+
+Now save it so we can add a forth layer.
+
+```{r savethirdlayer}
+gg <- gg + geom_point(position="jitter", color="blue", alpha=0.5)
+```
+
+Now let's add a rug plot
+
+```{r addrug}
+gg + geom_rug()
+```
+
+We could save this layer to the variable gg, but there is no need, because we have already plotted it and we don't need it again, for anything else.
+
+So instead let's start over with a new base layer.  This will be a density plot.  We are going to plot the density on the y axis and the salary on the x axis.  There will be there density plots of different colors (various "fill"'s).  We don't need to define an aesthetics for y because it is implied by density.  Remember this is a new base layer (no sum).
+
+```{r densitybaselayer}
+gg <- ggplot(data=Salaries, aes(x=salary, fill=rank))
+gg
+```
+
+Now add density object:
+
+```{r adddensity}
+gg + geom_density()
+```
+
+These would be better transparent:
+
+```{r makedensitiestrans}
+gg + geom_density(alpha=0.3)
+```
+
+Let's make a new plot.  We are going to do a map of murder rates in the US in 1973, the data are in USArrests.  The rows are labeled by state, however we need a column of states, not labels so we can add one with:
+```{r states}
+data(USArrests)
+crimes <- data.frame(state=tolower(rownames(USArrests)), USArrests)
+```
+
+Now let's do a new base layer.
+
+```{r statesbaselayer}
+gg <- ggplot(crimes, aes(map_id=state, fill=Murder))
+gg
+```
+
+Let's add a layer, first save, then plot.
+
+```{r addgeomstate}
+gg <- gg + geom_map(map=map_data("state"))
+gg
+```
+
+This still doesn't do anything except plot a legend.  We need to associate x and y.
+
+```{r makemap}
+gg <- gg + expand_limits(x=map_data("state")$long, y=map_data("state")$lat)
+gg
+```
+
+I am going to make this better by adding labels:
+
+```{r addlabels}
+gg + labs(title="Murder rates per 100,000 in 1973", x="logitude", y="latitude")
+```
+

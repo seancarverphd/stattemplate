@@ -1,0 +1,56 @@
+---
+title: "GGPlot-Section 5"
+author: "Sean Carver"
+date: "11/3/2017"
+output: html_document
+---
+
+The first step is install ggplot2.
+
+Now we are going to do a code block starting with 3 back ticks, then open bracket, then r, then a name, then close bracket. Then load ggplot2 then data.
+
+```{r load}
+library(ggplot2)
+data(singer, package='lattice')
+```
+
+Now we want to build a plot layer by layer.  The first layer is always with ggplot() with arguments data and aesthetics.
+
+```{r singerbaselayer}
+gg <- ggplot(singer, aes(x=voice.part, y=height))
+gg
+```
+
+Add a layer:
+
+```{r singerboxplot}
+gg <- gg + geom_boxplot(fill="lightgreen")
+gg
+```
+
+```{r singerviolin}
+gg <- gg + geom_violin(fill="lightblue")
+gg
+```
+
+```{r states}
+data(USArrests)
+crimes <- data.frame(state=tolower(rownames(USArrests)), USArrests)
+```
+
+```{r statesbaselayer}
+gg <- ggplot(crimes, aes(map_id=state, fill=Murder))
+gg
+```
+
+Add map, but we still have to tell it x and y.
+
+```{r addgeomstate}
+gg <- gg + geom_map(map=map_data("state"))
+gg
+```
+
+```{r makemap}
+gg <- gg + expand_limits(x=map_data("state")$long, y=map_data("state")$lat)
+gg
+```

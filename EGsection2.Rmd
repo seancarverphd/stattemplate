@@ -1,0 +1,42 @@
+---
+title: "EGsection2"
+author: "Sean Carver"
+date: "11/3/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(cache = TRUE)
+```
+
+Load ggplot2 and load data.
+
+```{r load}
+library(ggplot2)
+data(singer, package="lattice")
+```
+Make first layer.
+```{r singerbaselayer}
+gg <- ggplot(singer, aes(x=voice.part, y=height))
+gg
+```
+
+```{r geoms}
+gg + geom_boxplot(fill='lightgreen') + geom_violin(fill='lightblue', width=0.5)
+```
+
+```{r states}
+data(USArrests)
+crimes <- data.frame(state=tolower(rownames(USArrests)), USArrests)
+```
+```{r statesbaselayer}
+library(maps)
+gg <- ggplot(crimes, aes(map_id=state, fill=Murder))
+gg <- gg + geom_map(map=map_data("state"))
+gg <- gg + expand_limits(x=map_data("state")$long, y=map_data("state")$lat)
+gg
+```
+
+```{r addlabels}
+gg + labs(title="Murder rates per 100,000 in 1973", x="longitude", y="latitude")
+```
