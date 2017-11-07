@@ -8,6 +8,8 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(cache = TRUE)
 ```
+I drew much of the material in this lesson from,
+Wickham & Grolemund, "R for Data Science."
 
 So the first step is to load ggplot2 and the data.
 

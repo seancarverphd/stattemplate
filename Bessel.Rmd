@@ -1,6 +1,6 @@
 ---
 title: "Bessel’s Correction & Sampling Distributions"
-author: "My Name"
+author: "Professor Sean Carver"
 output: html_document
 ---
 
