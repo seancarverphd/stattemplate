@@ -1,0 +1,65 @@
+---
+title: "Active Learning—STAT 202"
+author: "Sean Carver"
+date: "11/6/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(cache = TRUE)
+```
+
+So the first step is to load ggplot2 and the data.
+
+```{r load}
+library(ggplot2)
+data(mpg)
+data(diamonds)
+```
+
+We are going to do a plot with the data set: mpg.  What is mpg?  Type "library(ggplot2)" then "data(mpg)" then ?mpg" in the console to find out.
+
+Now do a scatter plot with city miles per gallon and highway miles per gallon.
+
+```{r scattermpg}
+ggplot(data=mpg) + geom_point(mapping=aes(x=hwy, y=cty))
+```
+
+What did we do? "ggplot(data=mpg)" was the base layer, then we defined geom_point(mapping=aes(x=...,y=...)).  
+
+You can put "mapping=aes(...)" into either the base layer, or into the geoms.  In previous lessons, we put it in the base layer.  If you put it in the base layer, it applies to all of the geoms.  <span style="color:red"> Can you think of an example where it would be useful to have different aesthetic mappings in different geoms? </span>
+
+You can also define some aesthetics globally (in the base layer) and others for each geom.
+
+Now you try it.  <span style="color:red"> Add a code chunk below that plots the diamonds data set, price versus carat. </span>  The diamonds data set is already loaded for you.  You need to define the base layer and the scatter plot geom: geom_point() as done above.
+
+Now the next thing we are going to do is make the color of the dots red.
+
+```{r scatterred}
+ggplot(data=mpg) + geom_point(mapping=aes(x=hwy, y=cty), color="red")
+```
+
+Now we want different color dots, based on a categorical variable in the data set.  Which variable?  Let's pick drv, which is f for "front-wheel drive", r for "rear-wheel drive" and 4 for "four-wheel drive".  We will map drv to the aesthetic "color" in the mapping.  <span style="color:red"> Examine the code below. What is difference between the code above and code below? </span>
+
+```{r scatterdrv}
+ggplot(data=mpg) + geom_point(mapping=aes(x=hwy, y=cty, color=drv))
+```
+
+<span style="color:red"> Now look at the diamonds data set.  Try typing: "?diamonds" in the console.  Pick a categorical data to map to color.  Now add a code chunk that draws a scatter plot with different colored dots, based on your choice of categorical data. </span>
+
+In addition to color, you can also map variables to "size", "shape", "alpha" (transparency), and perhaps other things.  Of course, you can also define those aesthetics for the whole plot.
+
+<span style="color:red"> Now make several more plots, add them below, mapping different attributes to different variables, and try doing several attributes at once.  You can try with either data set: mpg or diamonds, or both (one at a time).  </span>
+
+<span style="color:red"> Try mapping a quantitative variable to color, size, or shape.  What happens? </span>
+
+<span style="color:red"> What happens if you map the same variable to multiple aesthetics? </span>
+
+<span style="color:red"> What does the stroke aesthetic do with geom_point()? Hint: it only works with continuous (i.e. quantiative) variable.  Try mpg instead of diamonds, otherwise it takes too long.</span>
+
+<span style="color:red"> What happens if you map an aesthetic to something other than a variable name, i.e. for mpg, aes(x = hwy, y = cty, color = disp < 5) </span>
+
+<span style="color:red"> Try adding another layer to your plots. </span> A good choice here is geom_smooth().  You need to define the aesthetics, (globally in the base layer, or locally in each geom).  Type "?geom_smooth()" into the console.  Also type "geom_point()" into the console.  Apparently, you can also define data locally as well.
+
+<span style="color:red"> Also see about making box plots, and/or violin plots with ggolot2.  We have done it before, but can you figure out how? </span>  For help, type "?geom_boxplot" and/or "?geom_violin" into the console.  These take an argument "fill".  Try putting it in as a argument (outside of aes) and try putting it in inside of aes, mapped to a variable, like "drv" in the mpg data set.
+
