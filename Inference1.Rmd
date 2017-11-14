@@ -1,0 +1,78 @@
+---
+title: "Inference I"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(cache = TRUE)
+```
+
+Let's review what we have done with the diamonds data set.  The diamonds data set comprised our reference population
+
+```{r load}
+library(ggplot2)
+data(diamonds)
+```
+
+```{r violinjitter}
+ggplot(data=diamonds, aes(x=0, y=price)) + geom_violin(fill="orange") +  geom_point(position="jitter", color="blue", alpha=0.1)
+```
+
+I chose to display the distribution a little differently.  I used a violin plot, as before, but I superimposed a scatterplot where x is mapped to 0, then jittered.  Take a look at the code, if you wish---it shouldn't seem mysterious to you, any more.
+
+Remember, we drew a sample from an unknown distribution, and we were going to test the null hypothesis,
+
+$$H_0 : \mbox{The sample was drawn from the reference population,}$$
+
+against the alternative,
+
+$$H_a: \mbox{The sample was drawn from a more expensive population.}$$
+
+Here we interpret "more expensive" as having a population mean greater than the population mean of the reference population.
+
+Conceptually, it is easiest to work with samples of size 1, but statisticians don't usually do this because the power is low.  The power is the probability that, if the sample comes from a more expensive population, you will actually determine that correctly.
+
+Let's start with samples of size 1.  Let's draw a sample.
+
+```{r drawsample}
+set.seed(1)
+S1 <- sample(diamonds$price,size=1)
+S1
+```
+
+That's our sample---one diamond, with price $5801, selected at random from the reference population.  Note, from the code, that, for this sample, our null hypothesis is true---the diamond was sampled from the reference population.
+
+Let's say we don't know what distribution this diamond was sampled from.  How are we going to decide between our hypotheses?  Our test statistic (for sample size 1) will be price.  
+
+If the price of our sampled diamond is great enough, we will say it came from a more expensive distribution (we will reject the null hypothesis).  If not, we will fail to reject the null hypothesis.
+
+How great is great enough?  If we follow tradition, then we will only say the sample came from a more expensive population, if our sampled diamond has a price that is greater than the prices of 95% of the diamonds.
+
+Let's put the 95th percentile and the price of the sampled diamond on the scatterplot.
+
+```{r jittercritical}
+ggplot(data=diamonds, aes(x=0, y=price)) + geom_violin(fill="orange") +  geom_point(position="jitter", color="blue", alpha=0.1) + geom_hline(yintercept=quantile(diamonds$price, probs=0.95), color="red") + geom_hline(yintercept=S1, color="black")
+```
+
+Above the black line lie the prices of 22.39% of the diamonds.  That means the p-value is 0.2239.
+
+The textbook definition of a p-value is "the probablility, computed assuming $H_0$ that the test statistic will take on a value at least as extreme as that actually observed."  In this context, "at least as extreme" means greater than or equal to $5801.
+
+I had a more convoluted definition of p-value which I thought would be clearer.  I now think it was just confusing.  Study the definition above and see how it relates to the picture: the proportion of diamonds that are above the black line.
+
+Here are some questions.  Don't overthink them.
+
+We said we would reject our null hypothesis in favor of our alternative hypothesis if the price of the sampled diamond is above the red line, our critical value for the test statistic, price. The red line was chosen so that 5% of diamonds were above it.
+
+<span style="color:red"> What proportion of diamonds in the reference population are above the red line? </span>
+
+<span style="color:red"> If a diamond is sampled at random from the reference distribution (so that each diamond in the data set has an equal chance of being selected), what is the probability that the selected diamond has a price above the red line </span>
+
+<span style="color:red"> If 100 different pseudorandom seeds are used for sampling 100 times repeatedly, about how many of these sampled diamonds will have prices above the red line? </span>
+
+If a diamond sampled from the reference population is above the red line, the null hypothesis will be rejected in correctly: a type I error. <span style="color:red">  What is the probability of a type I error? </span>
+
+The probability of a type I error is the level of significance of the test.  We set the level of significance of the test by choosing the red line to be at the $95^{th}$ percentile of the price of diamonds in the data set.  <span style="color:red"> What would the level of significance be if we set the red line, the critical value of price to be at the $99^{th}$ percentile of price. </span>
+
+
+
