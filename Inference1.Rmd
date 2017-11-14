@@ -18,7 +18,7 @@ data(diamonds)
 ggplot(data=diamonds, aes(x=0, y=price)) + geom_violin(fill="orange") +  geom_point(position="jitter", color="blue", alpha=0.1)
 ```
 
-I chose to display the distribution a little differently.  I used a violin plot, as before, but I superimposed a scatterplot where x is mapped to 0, then jittered.  Take a look at the code, if you wish---it shouldn't seem mysterious to you, any more.
+I chose to display the distribution a little differently.  I used a violin plot, as before, but I superimposed a scatterplot where x is mapped to 0, then jittered.  Take a look at the code, if you wish---it shouldn't seem mysterious to you, any longer.
 
 Remember, we drew a sample from an unknown distribution, and we were going to test the null hypothesis,
 
@@ -54,11 +54,11 @@ Let's put the 95th percentile and the price of the sampled diamond on the scatte
 ggplot(data=diamonds, aes(x=0, y=price)) + geom_violin(fill="orange") +  geom_point(position="jitter", color="blue", alpha=0.1) + geom_hline(yintercept=quantile(diamonds$price, probs=0.95), color="red") + geom_hline(yintercept=S1, color="black")
 ```
 
-Above the black line lie the prices of 22.39% of the diamonds.  That means the p-value is 0.2239.
+The black line is the price of our sampled diamond.  Above the black line lie the prices of 22.39% of the diamonds.  That means the p-value is 0.2239.
 
-The textbook definition of a p-value is "the probablility, computed assuming $H_0$ that the test statistic will take on a value at least as extreme as that actually observed."  In this context, "at least as extreme" means greater than or equal to $5801.
+The textbook definition of a p-value is "the probablility, computed assuming $H_0$, that the test statistic will take on a value at least as extreme as that actually observed."  In this context, "at least as extreme" means greater than or equal to $5801.
 
-I had a more convoluted definition of p-value which I thought would be clearer.  I now think it was just confusing.  Study the definition above and see how it relates to the picture: the proportion of diamonds that are above the black line.
+I had a more convoluted definition of p-value which I thought would be clearer.  I now think it was just confusing.  Study the definition above and see how it relates to the picture: the p-value is the proportion of diamonds with prices above the black line, the price of our sampled diamond.
 
 Here are some questions.  Don't overthink them.
 
@@ -68,11 +68,43 @@ We said we would reject our null hypothesis in favor of our alternative hypothes
 
 <span style="color:red"> If a diamond is sampled at random from the reference distribution (so that each diamond in the data set has an equal chance of being selected), what is the probability that the selected diamond has a price above the red line </span>
 
-<span style="color:red"> If 100 different pseudorandom seeds are used for sampling 100 times repeatedly, about how many of these sampled diamonds will have prices above the red line? </span>
+<span style="color:red"> If 100 different pseudorandom seeds are used for sampling 100 times repeatedly, from the reference population, about how many of these sampled diamonds will have prices above the red line? </span>
 
-If a diamond sampled from the reference population is above the red line, the null hypothesis will be rejected in correctly: a type I error. <span style="color:red">  What is the probability of a type I error? </span>
+If a diamond sampled from the reference population is above the red line, the null hypothesis will be rejected incorrectly: a type I error. <span style="color:red">  What is the probability of a type I error? </span>
 
-The probability of a type I error is the level of significance of the test.  We set the level of significance of the test by choosing the red line to be at the $95^{th}$ percentile of the price of diamonds in the data set.  <span style="color:red"> What would the level of significance be if we set the red line, the critical value of price to be at the $99^{th}$ percentile of price. </span>
+The probability of a type I error is the level of significance of the test.  We set the level of significance of the test by choosing the red line to be at the $95^{th}$ percentile of the price of diamonds in the data set.  <span style="color:red"> What would the level of significance be if we set the red line, the critical value of price, to be at the $99^{th}$ percentile of price? </span>
 
+The p-value is the proportion of diamonds that are above the black line, 0.2239.  <span style="color:red">  If the price of the sampled diamond were higher, say $10000, would the p-value be higher or lower? </span>
 
+We reject the null hypothesis with the p-value is less than the level of significance of the test.  <span style="color:red"> If the p-value is equal to the level of significance of the test, where will the black line be in relation to the red line? </span>
 
+Now lets sample from other populations (subsets of our reference population).  We'll sample from the choicest color D.
+
+```{r subsetD}
+set.seed(2)
+sample(subset(diamonds, color=="D")$price, size=1)
+```
+
+Sampling one diamond isn't too informative.  Let's do a figure, separating the diamonds by color:
+
+```{r jittercolor}
+ggplot(data=diamonds, aes(x=color, y=price, color=color, fill=color)) + geom_violin() +  geom_point(position="jitter", alpha=0.1) + geom_hline(yintercept=quantile(diamonds$price, probs=0.95), color="red")
+```
+
+I left the red line in there.  We are still trying to determine if a diamond sampled from one of these population comes from a more expensive population.  Which of these subpopulations are more expensive?  It isn't obvious from this figure.  If we select a diamond from one of these populations and that diamond has a price above the red line, we will say that it comes from a more expensive population.  Clearly, finding that the diamond comes from a more expensive population is not that likely to happen, for these colors, even if they are more expensive.  We say the power is low.  This is why it is advantageous to work with larger sample sizes.
+
+```{r meancolor}
+ggplot(data=diamonds, aes(x=color, y=price, color=color, fill=color)) + geom_violin() +  geom_point(position="jitter", alpha=0.1) + geom_hline(yintercept=quantile(diamonds$price, probs=0.95), color="red") + stat_summary(fun.y=mean, geom="point", size=2, color="black") + geom_hline(yintercept=mean(diamonds$price))
+```
+
+The black line is the mean of the whole diamonds data set.  The black dots are the mean of each color.  How about that?  The more expensive populations are the ones with higher color labels which are considered worse diamonds.  Presumably worse color diamonds tend to be more expensive perhaps because they have higher carat weights.  Remember, all things being equal J diamonds are the cheapest.  But all things are not equal and, as a population, they are the most expensive.
+
+Populations G-J are more expensive diamonds, on average, than the reference population.  J is the most expensive diamonds.  What is the probability that we will find that J diamonds are more expensive from one sample of a J diamond?  That number is the fraction of J diamonds that are above the red line.
+
+```{r power}
+Jdiamonds <- subset(diamonds,color=="J")
+redline <- quantile(diamonds$price, prob=0.95)
+sum(Jdiamonds$price>redline)/length(Jdiamonds$price)
+```
+
+Therefore we have an 8.76% chance of deciding, based on one sample, that the J diamonds are more expensive, on average.  That means the power to detect the alternative is 0.0867.  That is a very low power.  A power of 0.8 (80%) is considered good.  Notice that 0.0876 is larger than the level of significance, the chance we will incorrectly deem a diamond from the reference as coming from a more expensive population.  It's a little higher but not by much.  If we want more power, we need to use a larger sample size.
