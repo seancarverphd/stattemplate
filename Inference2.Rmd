@@ -1,0 +1,141 @@
+---
+title: "Inference 2"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(cache = TRUE)
+```
+
+Let me present the broad ideas now, then illustrate them below and in future lessons.  I'm just listing them now---they will make more sense later.
+
+## Idea 1: Sampling Distributions
+
+When we work with samples of size greater than 1, we work with sampling distributions.  In other words, instead of working with the distribution of price of diamonds, we will work with the distribution of the sample mean of price (i.e. the sampling distribution of the sample mean).
+
+## Idea 2: Central Limit Theorem
+
+We have discussed this already:  The sampling distribution for the sample mean has a stereotyped shape:  According to the Central Limit Theorem, this distribution is Normal (bell curved) with a specific mean and standard deviation, related by formulas to the population mean and population standard deviation.
+
+## Idea 3: Significance of Central Limit Theorem
+
+The significance of the Central Limit Theorem is that as long as our sample size is large enough, all we need to know, or assume, about the reference or null distribution is its mean and its standard deviation.  
+
+## Idea 4: One-sample t-tests
+
+What is a t-test?  A one-sample t-test tests the null hypothesis that the mean of the distribution is a certain reference value (the null hypothesis assumes or hypothesizes a mean), against an alternative that the mean is different in some way (e.g. the diamonds of the population sampled from are more expensive, or have a higher population mean, than the reference mean).  The Central Limit Theorem requires both the population mean and the population standard deviation.  The t-test uses the sample standard deviation in place of the population standard deviation so that no population is needed for the test---only a sample is needed.  That is the beauty of the t-test.
+
+## Idea 5: Two-sample t-tests
+
+Coming soon.
+
+## Idea 6: One and two sample proportion test.
+
+Coming soon.
+
+## Illustration 1:  Sampling Distributions
+
+There are 53940 diamonds in the diamonds data set.  But if we count the number of _samples_ of diamonds, we would have many more.  I calculated the number of different 4 diamond samples from our population of 53940 diamonds.  It was over 352 quadrillion: 352,682,748,864,312,165 to be exact.  The number of samples of size 1024 barely fit on my computer screen, when printed out.
+
+The mean of the price of diamonds is $3989.44.  Each of the 352 quadrillion samples of size 4 has a sample mean (add up the prices of the 4 diamonds in the sample and divide by 4).  If you add up all 352 quadrillion sample means and divide by 352 quadrillion, you get exactly $3989.44.  In other words, the sample mean is an unbiased estimator of the population mean.
+
+The number 352 quadrillion is way too large to work with.  Therefore, we work with a smaller number of samples, chosen randomly.
+
+Remember the plot below?  For this plot I used 1000 samples for each sample size.
+
+
+```{r samplesizeplot, echo=F}
+library(ggplot2)
+data(diamonds)
+diamonds.price.sample.of.n <- function(sample.size) {
+  return(sample(diamonds$price, sample.size))
+}
+
+m.statistics.of.n <- function(statistic,number.of.samples,sample.size) {
+  stats <- c()
+  for (k in 1:number.of.samples) {
+    stats <- c(stats, statistic(diamonds.price.sample.of.n(sample.size)))
+  }
+  return(stats)
+}
+
+set.seed(2)
+m <- 1000
+stats <- cbind()
+labels <- cbind()
+levels <- c(1,4,16,64,256,1024)
+for (i in c(1,4,16,64,256,1024)) {
+  new.stats <- cbind(m.statistics.of.n(statistic=mean, number.of.samples=m, sample.size=i))
+  new.labels <- cbind(rep(as.character(i), m))
+  stats <- rbind(stats, new.stats)
+  labels <- rbind(labels, new.labels)
+}
+df <- data.frame(stats,labels)
+df$labels <- factor(df$labels,levels=as.character(levels))
+ggplot(df, aes(x=labels, y=stats)) + geom_violin() + geom_boxplot(width=0.1) + xlab("Sample Size") + ylab("Sample Mean") + stat_summary(fun.y=mean, geom="point", size=2, color="red") + geom_hline(yintercept=mean(diamonds$price))
+```
+
+Remember the conclusion we drew from this picture?  We saw that as the sample size increase the spread in the sampling distribution got smaller.
+
+Now let's work with samples of size 1024, the right most distribution on the graph above.
+
+Let's try to answer the same question we asked yesterday, but with a sample of size 1024 instead of a single diamond.  Specifically, we will test the same two hypotheses:
+
+$$H_0 : \mbox{The sample (of size 1024) was drawn from the reference population,}$$
+
+against the alternative,
+
+$$H_a: \mbox{The sample (of size 1024) was drawn from a more expensive population.}$$
+Again, here, "more expensize population" means a population with a population mean greater than the population mean of the reference population.
+
+Our test statistic will no longer be the price of a single diamond.  There are 1024 diamonds in the sample, so the price of a single diamond is not appropriate.  What will we use instead?  We will use the sample mean of the prices of all 1024 diamonds: our test statistic will be the sum of the prices of the 1024 diamonds in the sample, and divide by 1024.  If that number is large enough, we will say that the diamonds come from a more expensive population.
+
+How large is large enough?  Well, in the last lesson, when our sample consisted of just one diamond, we set the threshold, the critical value of the test statistic, to be the 95th percentile of the price of diamonds.  We represented this threshold with a red line.  The red line was drawn so that only 5% of the diamonds had prices above it.
+
+Now we are going to draw a different red line, but the same idea applies.  The red line is going to be drawn so that only 5% of samples have sample means above the red line.  However there are too many sample means to work with (remember the number, when printed out, barely fits on a computer screen).  So instead we are going to draw the red line where only 5% of 1000 randomly chosen samples have sample means above the red line.
+
+```{r sample1024}
+sample.means<-m.statistics.of.n(mean,1000,1024)
+df.samples <- data.frame(sample.means)
+ggplot(df.samples, aes(x=0, y=sample.means)) + geom_violin() + geom_boxplot(width=0.1) + ylab("Sample Mean") + geom_hline(yintercept=quantile(sample.means,probs=0.95), color="red")
+```
+
+The plot below is a zoom in of the violin/boxplot for sample size 1024, with the 95th percentile drawn in (red line).  If the sample mean of the 1024 diamonds is above the red line we will reject the null hypothesis that the diamonds are sampled from the reference population, in favor of the alternative hypothesis that they come from a more expensive population.
+
+Now let's go back to the picture of the different population for each color of diamonds D-J:
+
+
+```{r meancolor}
+ggplot(data=diamonds, aes(x=color, y=price, color=color, fill=color)) + geom_violin() +  geom_point(position="jitter", alpha=0.1) + geom_hline(yintercept=quantile(sample.means, probs=0.95), color="red") + stat_summary(fun.y=mean, geom="point", size=2, color="black") + geom_hline(yintercept=mean(diamonds$price))
+```
+
+Now you can see that there are many diamonds of color J that are above the red line.  But for computing power, the question is not: what fraction of J diamonds have prices above the red line.  But rather: what fraction of samples of size 1024 have sample means above the red line:  Let's estimate this:
+
+```{r power}
+Jdiamonds <- subset(diamonds,color=="J")
+sample.mean.of.J <- c()
+for (i in 1:1000) {
+  sample.mean.of.J[i] <- mean(sample(Jdiamonds$price,size=1024))
+}
+redline <- quantile(sample.means, prob=0.95)
+sum(sample.mean.of.J>redline)/length(sample.mean.of.J)
+```
+
+How about that?  The power is 1.  We are certain, or almost certain to get the right answer (that the population is more expensive) with a sample of size 1024.  Actually, we are not completely certain of this.  This power estimate is just base on 1000 samples.  With 1000 samples we got the answer right every time.  However, perhaps if we had used 1,000,000 samples we would have gotten the answer wrong (a type II error) once in a while.
+
+Let's look at some data:
+
+```{r heads}
+head(sample.mean.of.J)
+head(sample.means)
+```
+
+Now some questions:
+
+<span style="color:red"> What is the difference between a type I error and a type II error? </span>
+
+Above we chose the level of significance to be the traditional value of 0.05.  <span style="color:red"> If we instead chose the level of signficance to be 0.01, what would the probability of a type I error be? </span>
+
+<span style="color:red"> If we instead chose the level of signficance to be 0.01, what would the power of the test go up or down? </span>
+
+<span style="color:red"> If we tried to answer the question are G-colored diamonds more expensive on average with a test of signicance and a sample size of 1024, what would happen to the power?
