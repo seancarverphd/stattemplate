@@ -4,7 +4,7 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(cache = TRUE)
+knitr::opts_chunk$set(cache = FALSE)
 ```
 
 ## Review of Confidence Intervals
@@ -62,8 +62,9 @@ data(diamonds)
 ```
 
 ```{r draw64}
+sample.size <- 1000
 set.seed(2)
-dia64 <- sample(diamonds$price, size=64)
+dia64 <- sample(diamonds$price, size=sample.size)
 dia64
 ```
 
@@ -73,7 +74,7 @@ We are going to create a bootstrap distribution for the sample mean using this s
 set.seed(3)
 bs1000 <- c()
 for (i in 1:1000) {
-  bs1000[i] <- mean(sample(dia64, size=64, replace=TRUE))
+  bs1000[i] <- mean(sample(dia64, size=sample.size, replace=TRUE))
 }
 head(bs1000)
 ```
@@ -84,7 +85,7 @@ Now we are going to get 1000 samples from the whole sampling distribution of dia
 set.seed(4)
 dp1000 <- c(0)
 for (i in 1:1000) {
-  dp1000[i] = mean(sample(diamonds$price, size=64))
+  dp1000[i] = mean(sample(diamonds$price, size=sample.size))
 }
 head(dp1000)
 ```
