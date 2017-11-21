@@ -1,0 +1,118 @@
+---
+title: "Bootstrap"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(cache = TRUE)
+```
+
+## Review of Confidence Intervals
+
+When we compute a confidence interval, we first compute an estimate of a parameter with a statistic.
+
+For example, we draw a random sample then compute the sample mean to estimate the parameter.
+
+With a single sample (or anything short of the whole population) we don't know where the population mean lies, so we want to localize the population mean within an interval, computed from the data in the sample.  
+
+An interval is a range of values (e.g. all real numbers between 4801 and 6801: written [4801, 6801]).  A confidence interval is a range of plausible intervals for the parameter.  A 95% confidence interval for a parameter is an interval computed by a method  guaranteed to successfully cover the parameter 95% of the time (i.e. for 95% of the samples).
+
+We call 95% the "confidence level" for the parameter.  Other confidence levels, anything between 0% and 100%, are possible.
+
+<span style="color:red"> As the confidence level increases, what happens to the width of the confidence interval? </span>
+
+<span style="color:red"> As a follow up to the last question, will you be more confident that the population mean lies in a bigger interval, or less confident. </span>
+
+<span style="color:red"> As the sample size increases, what happens to the width of the confidence interval? </span>
+
+<span style="color:red"> In other words, will you be able to localize the population mean better (in a smaller interval) with a larger sample size? </span>
+
+<span style="color:red"> If the variablility in the population increases, what happens to the width of the confidence interval? </span>
+
+<span style="color:red"> In other words, will you be able to localize the population mean better (in a smaller interval) with more variability in the population? </span>
+
+## Drawing Confidence Intervals Assuming You Know Shape of Sampling Distribution
+
+According to the Central Limit Theorem, the sampling distribution for the sample mean has a Normal (bell shaped) distribution.  Using this approximation, and the 68-95-99.7 Rule to assign a margin of error (half the width of the confidence interval, centered on sample mean) to be 2 times the standard error (a statistic that estimates the standard deviation of the sampling distribution).  We did this in class the Friday before Thanksgiving.
+
+## Bootstrap
+
+Now I want to talk about another method of estimating confidence intervals.  It's called the "bootstrap".  Why is it called the bootstrap?   Well, you take a single sample, and estimate the variability in the population by "pulling yourself up by your bootstraps".  (I am not making this up.)
+
+We have only one sample, but we want to use it to get more samples from the sampling distribution of the same size.  We do this by sampling from replacement.  We are pulling things out of a hat and throwing them back before we draw the next number. Say we have a sample of prices of diamonds: 1, 2, 3, 4.
+
+Now we draw new samples with the same distribution:
+
+```{r newsamples}
+set.seed(1)
+sample(c(1,2,3,4),size=4,replace=TRUE)
+sample(c(1,2,3,4),size=4,replace=TRUE)
+sample(c(1,2,3,4),size=4,replace=TRUE)
+sample(c(1,2,3,4),size=4,replace=TRUE)
+sample(c(1,2,3,4),size=4,replace=TRUE)
+```
+
+The idea is that we are drawing new samples such that a quarter of the time we choose 1, a quarter of the time we choose 2, and so on.  This gives us an indication of the variability in our sampling distribution, using just the information in a single sample and without drawing more than one sample.
+
+Now let's draw a sample of the price of diamonds from the diamonds data set.  I'll use a sample size of 64,  (We certainly can't use a sample size of 1, and we probably don't want it to be too small, although it would be an interesting experiment to see what happens with small sample sizes.)
+
+```{r load}
+library(ggplot2)
+data(diamonds)
+```
+
+```{r draw64}
+set.seed(2)
+dia64 <- sample(diamonds$price, size=64)
+dia64
+```
+
+We are going to create a bootstrap distribution for the sample mean using this sample.  We will take 1000 samples from this distribution:
+
+```{r bs1000}
+set.seed(3)
+bs1000 <- c()
+for (i in 1:1000) {
+  bs1000[i] <- mean(sample(dia64, size=64, replace=TRUE))
+}
+head(bs1000)
+```
+
+Now we are going to get 1000 samples from the whole sampling distribution of diamonds (without a bootstrap).  This is obviously better, but we need to draw 1000 samples from our population.  If it were very expensive to do this (e.g. we have to run 1000 different random surveys), we might not be able to do this.
+
+```{r dp1000}
+set.seed(4)
+dp1000 <- c(0)
+for (i in 1:1000) {
+  dp1000[i] = mean(sample(diamonds$price, size=64))
+}
+head(dp1000)
+```
+
+Now let's display the two side by side.
+
+```{r df}
+labp <- cbind(rep('population',1000))
+labb <- cbind(rep('bootstrap',1000))
+labels <- rbind(labp, labb)
+statp <- cbind(dp1000)
+statb <- cbind(bs1000)
+stats <- rbind(statp, statb)
+df <- data.frame(stats=stats,labels=labels)
+```
+
+```{r plotdf}
+ggplot(data=df,mapping=aes(x=labels,y=stats)) + geom_violin() + geom_boxplot()
+```
+
+Here is the claim: even though the means are different, the spread in the two distributions should be roughly the same, so that 95% of the time, the population mean will lie between the 2.5th percentile and the 97.5th percentile.
+
+```{r ci}
+lo <- quantile(bs1000, probs=0.025)
+hi <- quantile(bs1000, probs=0.975)
+ggplot(data=df,mapping=aes(x=labels,y=stats)) + geom_violin() + geom_boxplot() + geom_hline(yintercept=lo,color="green") + geom_hline(yintercept=hi,color="green")+ geom_hline(yintercept=mean(diamonds$price),color="black")
+```
+
+The black line is the mean of the entire population (not 1000 samples), the green lines are the percentiles that define the confidence interval for our original sample of 64; they percentiles of the 1000 bootstrap samples.
+
+Note that our 95% confidence interval is one of the 95% that cover the true value of the parameter (the population mean).
