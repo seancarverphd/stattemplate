@@ -62,7 +62,7 @@ data(diamonds)
 ```
 
 ```{r draw64}
-sample.size <- 1000
+sample.size <- 64
 set.seed(2)
 dia64 <- sample(diamonds$price, size=sample.size)
 dia64
@@ -117,3 +117,41 @@ ggplot(data=df,mapping=aes(x=labels,y=stats)) + geom_violin() + geom_boxplot() +
 The black line is the mean of the entire population (not 1000 samples), the green lines are the percentiles that define the confidence interval for our original sample of 64; they percentiles of the 1000 bootstrap samples.
 
 Note that our 95% confidence interval is one of the 95% that cover the true value of the parameter (the population mean).
+
+## New after Thanksgiving
+
+I'll condense the steps into two: (1) obtain the sample you plan to use, then (2) compute the confidence interval.
+
+For (1) we will use subpopulations of diamonds:
+
+```{r subpopulation}
+set.seed(10)
+sample.size <- 64
+subpop <- subset(diamonds, color=="J")$price
+mysample <- sample(subpop, size=sample.size)
+```
+
+Now (2) compute the CI
+```{r computeci}
+set.seed(11)
+bs1000 <- c()
+for (i in 1:1000) {
+  bs1000[i] <- mean(sample(dia64, size=sample.size, replace=TRUE))
+}
+confidence.level = 0.95
+lowerlevel = (1-confidence.level)/2
+upperlevel = confidence.level + (1-confidence.level)/2
+ci <- quantile(bs1000, probs = c(lowerlevel, upperlevel))
+ci
+```
+
+As a third, extra step, we can plot results, but unlike what we did above, we won't plot the correct answer, because we won't assume we know the correct answer.
+
+```{r plotci}
+df <- data.frame(stats=bs1000)
+ggplot(data=df,mapping=aes(x=0,y=stats)) + geom_violin() + geom_boxplot() + geom_hline(yintercept=ci[1],color="green") + geom_hline(yintercept=ci[2],color="green")
+```
+
+Found on Wikipedia concerning this method: "This method can be applied to any statistic. It will work well in cases where the bootstrap distribution is symmetrical and centered on the observed statistic[27] and where the sample statistic is median-unbiased and has maximum concentration (or minimum risk with respect to an absolute value loss function). In other cases, the percentile bootstrap can be too narrow.[citation needed] When working with small sample sizes (i.e., less than 50), the percentile confidence intervals for (for example) the variance statistic will be too narrow. So that with a sample of 20 points, 90% confidence interval will include the true variance only 78% of the time[28]."
+
+<span style="color:red"> Try defining a sample with the "cut" characteristic of diamonds and repeating the calculation of confidence interval.  Based on samples are "fair" or "premium" diamonds more expensive?  Change the sample size until confidence intervals don't overlap.  About how large a sample size do you need (try 1, 4, 16, 64, 256, 1024)?
