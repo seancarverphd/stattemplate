@@ -1,0 +1,99 @@
+---
+title: "Sleep Project Example"
+author: "Sean Carver"
+date: "November 29, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## STEP 1: Design the experiment
+
+One of the things you have to do here is decide how you are going to collect the data.  How many subjects are you going to have?  What groups are there going to be what are you going to do differently for each group---these are called different treatments).
+
+For us, this step is superfluous because we are handed a data set.  But typically before you collect data you also decide how you are going to analyze it.  What tests will you use?  What hypotheses will you test?  Often you make these decisions before you collect data.  Again, because we are handed a data set, I am going to put these decisions off until after we have seen the data, which is not a best practice in statistics, but it is a little more tutorial and it is fine for our purposes.
+
+## STEP 2: Collect (or load) data
+
+```{r load}
+sleep <- read.csv("sleep.csv")
+sleep
+```
+
+## STEP 3: Describe data
+We have a data set with 21 rows and 2 columns.  The rows represent the subjects of the study (college students) and the columns represent variables.  The first variable is "improve" the improvement of scores on a cognitive task over time.  If a subject gets worse over time, "improve" is negative.  The second column "group" is a binary categorical variable placing each subject in to one of two different groups: unrest and deprived.  Subjects in the unrest group were allowed to enjoy unrestricted sleep for the course of the study.  Subjects in the deprived were deprived of sleep, then allowed to try to catch up on sleep.  There were 10 subjects in the unrest group and 11 subjects in the deprived group.
+
+## STEP 4: Identify the purpose of the study
+
+The purpose of the study is to assess the evidence that subjects can catch up on sleep, and perform equally well on a cognitive task with those not recently deprived of sleep, or alternatively, that sleep deprivation impairs subjects beyond a period of catching up.
+
+## STEP 5: Visualize data
+
+It is always a good idea to visualize your data, as soon as you load it.  Technically this should be done after you design the study, but as mentioned above, we are going to switch the order around.
+
+Load graphics library, then plot:
+
+```{r plotdata}
+library(ggplot2)
+ggplot(data=sleep, mapping=aes(x=group, y=improve)) + geom_point()
+```
+
+## STEP 6: Interpret the plot
+
+The plot suggests that the unrest group may improve more than the deprived group.  However, there is a lot of intersubject variability, and the sample sizes are pretty low, so we don't know, without doing a test of significance whether or not the pattern we see could be due to chance, and that there no difference between the groups that would hold up when we look at the populations as a whole (e.g. all college students, and not just samples of 10 or 11).  If this were the case, then the difference we see in the plot would be due bad luck as we drew the samples.  We need to back this plot up with a p-value: the probability, if there is actually no difference between groups, of seeing data as or more suggestive of a difference between groups than seen in the samples shown.  If this probability is low, we would interpret that result as evidence against the statement that there actually is no difference between groups.  The plot suggests an answer to our question. The p-value backs that suggestion up with solid evidence.
+
+## STEP 7: Formulate the null hypothesis.
+
+This should be a statement in terms of the parameters of the populations.  First of all identify what the populations are.  These are the groups from which the samples are drawn from.  For example, if the samples are drawn from college students, then the unrest populations is all college students that could be allowed to enjoy unrestricted sleep, and the deprived population is all college students that could be given the other treatment.  The samples are drawn from these populations.  There are perhaps millions of students in the populations, whereas there are only 10 or 11 in the samples.  Whereas, we usually only think of one of each possible population, the samples are one of many that could conceivably be drawn from the populations.  A parameter is a number that describes a population, a statistic is a number that describes a sample.  Can you think of the numbers we are interested in that describe the populations?  How about population means?  We say the null hypothesis is that the population mean for the unrest group is equal to the population mean of the deprived group.  Typically this is expressed as the difference in means is zero.
+
+## STEP 8: Identify the alternative hypothesis.
+
+This is the statement that the population means are different (unequal, less than, or greater than).  The best choice here, since we have seen the data is the most conservative one: that they are unequal.  This is always a good choice, and some statisticians recommend that you always make this choice.  This is the default choice in R.
+
+## STEP 9: Decide on type of test.
+
+The choices here are t-test and proportions test.  T test is for testing hypotheses about population means of a quantitative variable.  Proportion tests are for testing hypotheses about population proportions of categorical variable, for example if the improve variable were categorial: "yes" or "no".  The correct choice is t-test.
+
+## STEP 10: Choose one sample or two.
+
+The correct choice is two sample---we have a sample for unrest and a sample for deprived.
+
+## STEP 11: Check assumptions of the test
+
+For the t-test, the main assumption is that the data lie close enough to a Normal (bell shaped) distribution.  How close does it have to be?  It depends on the sample size, the greater the sample size the more robust the t-test is to non-Normality.  Actually even for small sample sizes (10 or 11) it is fairly robust, so unless there is strong skewness or substantial outliers we will be OK.
+
+The best way of judging this is with a qq-plot.
+
+```{r qq}
+ggplot(data=sleep) + geom_qq(mapping=aes(sample=improve, color=group))
+```
+
+If the data are Normal, they will lie on line.  This graphs shows that it is probably close enough.  If it were significantly less Normal, you should note this, and continue.
+
+## STEP 12: Decide on a level of significance of the test
+
+It is always a safe bet to use the traditional level of significance 0.05.
+
+## STEP 13: Perform the test
+
+```{r ttest}
+t.test(formula=improve~group, data=sleep)
+```
+
+## STEP 14: Interpret the p-value
+
+Since the p-value is less than the level of significance, we REJECT the null hypothesis that the means are equal.
+
+## STEP 15: Interpret the confidence interval
+
+The confidence interval is the range of plausible values for the difference in means.  Zero is not in this interval.  Therefore 0 is not a plausible value for the difference in means, so it is not plausible that the means are the same.  The result of STEP 15 is consistent with the result of STEP 14.
+
+## STEP 16: Interpret the sample estimates
+
+We have concluded that the means are not equal, but we really want to know: is it better to be sleep deprived or enjoy unrestricted sleep?  Knowing that the means are unequal we can answer this question by looking the sample estimates unrest improved more than deprived.
+
+## STEP 17: State your conclusion
+
+We have evidence that sleep deprived students are still impaired on cognitive tasks relative to students who enjoy unrestricted sleep, even after they have a chance to try to catch up on sleep.
