@@ -29,6 +29,17 @@ Here is how you do it:
 ggplot(data=fish, mapping=aes(x=riffle, y=pool)) + geom_point() + geom_abline(slope=1, intercept=0) + annotate("text", x=1.25, y=4, label="More in Pool") + annotate("text", x=3.5, y=2, label="More in Riffle")
 ```
 
+## STEP 11: Check Assumptions
+
+Check Normality
+
+```{r qq}
+gg <- ggplot(data=fish)
+gg + geom_qq(mapping=aes(sample=fish$pool))
+gg + geom_qq(mapping=aes(sample=fish$riffle))
+```
+
+
 ## STEP 13
 
 This is a paired problem.  Each x is paired with a single y.  This was not the case with the sleep data set where there was no pairing between the Unrest subjects and the Deprived subjects.  Because of this we do the t.test a little differently.  Specifically we do a paired t.test.
