@@ -1,0 +1,38 @@
+---
+title: "Fish Project Selected Steps"
+author: "Sean Carver"
+date: "December 5, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## STEP 2:
+
+```{r load}
+library(ggplot2)
+fish <- read.csv("fish.csv")
+fish
+```
+
+## STEP 5:
+
+There is no reason to plot location---location is just a label, and there is no reason to think that these labels are arbitrary.  Nothing about location answers our question, which is "in each location are there more fish in the pools or in the riffles".  We could plot histograms for each variable---pool and riffle, but the trouble is we are interested in how they relate to each other.  What does it mean that there are 4 fish in the pool?  It means one thing if there are 2 fish in the riffle in the same location and it means and entirely different thing that there are 8 fish in the riffle.
+
+I suggest a scatterplot with pool and riffle.  To interpret the plot, superimpose the line where pool=riffle or y=x (slope 1, intercept 0).  On one side of the line there are more fish in the pool and on the other there are more fish in the riffle.
+
+Here is how you do it:
+
+```{r plotscatter}
+ggplot(data=fish, mapping=aes(x=riffle, y=pool)) + geom_point() + geom_abline(slope=1, intercept=0) + annotate("text", x=1.25, y=4, label="More in Pool") + annotate("text", x=3.5, y=2, label="More in Riffle")
+```
+
+## STEP 13
+
+This is a paired problem.  Each x is paired with a single y.  This was not the case with the sleep data set where there was no pairing between the Unrest subjects and the Deprived subjects.  Because of this we do the t.test a little differently.  Specifically we do a paired t.test.
+
+```{r ttestfish}
+t.test(fish$pool, fish$riffle, paired=TRUE)
+```
